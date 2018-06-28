@@ -1,0 +1,86 @@
+<html ng-app="hApp">
+<head>
+  <script src="angular.min.js"></script>
+  <script>
+    var model = {
+      "title": "products",
+      "list": [
+      ]
+    }
+    var hApp = angular.module("hApp",[]);
+    hApp.controller("hCtrl",function ($scope, $http) {
+      $scope.items = model;
+      $scope.add = function () {
+          // Get Max ID
+          var max = 0;
+          $scope.items.list.forEach(function(item,index,arr) {
+              if (item.id > max)
+                max = item.id;
+          })
+          // Push new name using MAX ID + 1
+          $scope.items.list.push({
+            "id": max + 1, "name": $scope.newName
+          });
+          // Reset Input Name
+          $scope.newName = "";
+      };
+      $scope.delete = function (id) {
+        // Search ID and Splice it from array
+        $scope.items.list.forEach(function(item,index,arr) {
+          if (item.id == id)
+            return arr.splice(index,1);
+        })
+      };
+
+      $scope.load = function() {
+        // Ajax to get products
+        $http
+        .post("/products/load")
+        .then(function(response) {
+          $scope.items = response.data;
+        });
+      }
+
+      $scope.save = function() {
+        // Ajax to put products
+        $http
+        .post("/products/save",$scope.items)
+        .then(function(response) {
+        });
+      }
+    })
+  </script>
+</head>
+
+<body ng-controller="hCtrl">
+  Products
+  <br><br>
+
+  <input type=button value="load" ng-click="load()"> -
+  <input type=button value="save" ng-click="save()">
+  <br><br>
+
+  <input type=text ng-model="newName">
+  <input type=button value="add" ng-click="add()">
+  <br><br>
+
+  <table>
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>NAME [{{items.list.length}}]</th>
+        <th>Delete</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="item in items.list">
+        <td>{{item.id}}</td>
+        <td>{{item.name}}</td>
+        <td>
+          <input type=button value="X" ng-click="delete(item.id)">
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</body>
+</html>
