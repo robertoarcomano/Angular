@@ -1,86 +1,79 @@
-<html ng-app="hApp">
+<!-- 1. Define app -->
+<html ng-app="hApp" lang="en">
 <head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+  <!-- 2. Include jquery, popper, bootstrap, angular and products -->
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
   <script src="angular.min.js"></script>
-  <script>
-    var model = {
-      "title": "products",
-      "list": [
-      ]
-    }
-    var hApp = angular.module("hApp",[]);
-    hApp.controller("hCtrl",function ($scope, $http) {
-      $scope.items = model;
-      $scope.add = function () {
-          // Get Max ID
-          var max = 0;
-          $scope.items.list.forEach(function(item,index,arr) {
-              if (item.id > max)
-                max = item.id;
-          })
-          // Push new name using MAX ID + 1
-          $scope.items.list.push({
-            "id": max + 1, "name": $scope.newName
-          });
-          // Reset Input Name
-          $scope.newName = "";
-      };
-      $scope.delete = function (id) {
-        // Search ID and Splice it from array
-        $scope.items.list.forEach(function(item,index,arr) {
-          if (item.id == id)
-            return arr.splice(index,1);
-        })
-      };
-
-      $scope.load = function() {
-        // Ajax to get products
-        $http
-        .post("/products/load")
-        .then(function(response) {
-          $scope.items = response.data;
-        });
-      }
-
-      $scope.save = function() {
-        // Ajax to put products
-        $http
-        .post("/products/save",$scope.items)
-        .then(function(response) {
-        });
-      }
-    })
-  </script>
+  <script src="products.js"></script>
 </head>
 
+<!-- 3. Define Controller -->
 <body ng-controller="hCtrl">
-  Products
-  <br><br>
+  <div style="width: 350px;">
 
-  <input type=button value="load" ng-click="load()"> -
-  <input type=button value="save" ng-click="save()">
-  <br><br>
+    <!-- 4. Products Count & Load & Save Buttons -->
+    <h5 class="card-title">Products Count: {{filtered.length}}</h5>
+    <button type="button" class="btn btn-success" ng-click="load()">Load</button>
+    <button type="button" class="btn btn-warning" ng-click="save()">Save</button>
+    <br><br>
 
-  <input type=text ng-model="newName">
-  <input type=button value="add" ng-click="add()">
-  <br><br>
+    <!-- 5. Product List -->
+    <div style="height: 60%; overflow-y: scroll">
+      <div ng-repeat="item in items.list|filter: searchFilter|orderBy:'name' as filtered" class="card" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{item.name}}</h5>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editPrompt{{item.id}}">
+            Edit
+          </button>
+          <a href="#" class="btn btn-danger" ng-click="delete(item.id)">Delete</a>
+        </div>
+      </div>
+    </div>
+    <br><br>
 
-  <table>
-    <thead>
-      <tr>
-        <th>ID</th>
-        <th>NAME [{{items.list.length}}]</th>
-        <th>Delete</th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr ng-repeat="item in items.list">
-        <td>{{item.id}}</td>
-        <td>{{item.name}}</td>
-        <td>
-          <input type=button value="X" ng-click="delete(item.id)">
-        </td>
-      </tr>
-    </tbody>
-  </table>
+    <!-- 6. Search & Create Product -->
+    Search & Create Product
+    <form name="form1" ng-submit="add()">
+      <input type=text ng-model="searchAndCreateName" required>
+      <button type="submit" class="btn btn-info" ng-disabled="form1.$invalid">Add</button>
+    </form>
+    <br>
+  </div>
+
+  <!-- 7. Modal Popup to Edit Product -->
+  <div ng-repeat="item in items.list" class="modal fade" id="editPrompt{{item.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Edit Product {{item.id}}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input id="product_{{item.id}}" type=text value={{item.name}}>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" ng-click="edit('#editPrompt'+item.id,'#product_' + item.id,item.id)">Edit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 8. On Showing Modal Prompt => select & focus input field -->
+  <script>
+    $(window).on('shown.bs.modal', function() {
+      var inputObj = $(".modal-body").find("input");
+      inputObj.select();
+      inputObj.focus();
+    });
+  </script>
+
 </body>
 </html>

@@ -1,162 +1,91 @@
 # Angular
 Useful examples on Angularjs
 
-## Source
-<img src=source.png>
-
 ## HTML
-<img src=html.png>
+#### Main HTML and Chrome Source Inspector
+<img src=html1.png>
 
-# 1. Include js
-  ```
+#### Edit Modal Prompt
+<img src=html2.png>
+
+## 1. Define app
+```
+<html ng-app="hApp" lang="en">
+```
+## 2. Include jquery, popper, bootstrap, angular and products
+```
+  <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js" integrity="sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49" crossorigin="anonymous"></script>
+  <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/js/bootstrap.min.js" integrity="sha384-smHYKdLADwkXOn1EmN1qk/HfnUcbVRZyYmZ4qpPea6sjB/pTJ0euyQp0Mk8ck+5T" crossorigin="anonymous"></script>
   <script src="angular.min.js"></script>
+  <script src="products.js"></script>
   ```
-
-# 2. Define app
+## 3. Define Controller
 ```
-  <html ng-app="hApp">
-  ```
-
-# 3. Define model
+<body ng-controller="hCtrl">
 ```
-  var model = {
-    "title": "helloworld",
-    "list": [
-      { "id": 1, "name": "alfa"},
-      { "id": 2, "name": "beta"},
-      { "id": 3, "name": "gamma"}
-    ]
-  }
-  ```
-
-# 4. Declare var
+## 4. Products Count & Load & Save Buttons
 ```
-  var hApp = angular.module("hApp",[]);
-  ```
-
-# 5. Set Controller
+    <h5 class="card-title">Products Count: {{filtered.length}}</h5>
+    <button type="button" class="btn btn-success" ng-click="load()">Load</button>
+    <button type="button" class="btn btn-warning" ng-click="save()">Save</button>
 ```
-  hApp.controller("hCtrl",function ($scope) {
-    $scope.items = model;
-  }
-  ```
-
-# 6. Define controller
+## 5. Product List
 ```
-  <body ng-controller="hCtrl">
-  ```
-
-# 7. ng-repeat
+    <div style="height: 60%; overflow-y: scroll">
+      <div ng-repeat="item in items.list|filter: searchFilter|orderBy:'name' as filtered" class="card" style="width: 18rem;">
+        <div class="card-body">
+          <h5 class="card-title">{{item.name}}</h5>
+          <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editPrompt{{item.id}}">
+            Edit
+          </button>
+          <a href="#" class="btn btn-danger" ng-click="delete(item.id)">Delete</a>
+        </div>
+      </div>
+    </div>
 ```
-  <tr ng-repeat="item in items.list">
-    <td>{{item.id}}</td><td>{{item.name}}</td>
-  </tr>
-  ```
-
-# 8. ng-click
+## 6. Search & Create Product
 ```
-  <input type=button value="add" ng-click="add()">
-  ```
-
-# 9. Basic var
+    Search & Create Product
+    <form name="form1" ng-submit="add()">
+      <input type=text ng-model="searchAndCreateName" required>
+      <button type="submit" class="btn btn-info" ng-disabled="form1.$invalid">Add</button>
+    </form>
 ```
-  <th>ID</th><th>NAME [{{items.list.length}}]</th>
-  ```
-
-# 10. Modify model
-  ## 10.1. add
-  - HTML
-    ```
-    <input type=text ng-model="newName">
-    <input type=button value="add" ng-click="add()">
-    ```
-  - CONTROLLER
-    ```
-    $scope.add = function () {
-        var max = 0;
-        $scope.items.list.forEach(function(item,index,arr) {
-            if (item.id > max)
-              max = item.id;
-        })
-        $scope.items.list.push({
-          "id": max + 1, "name": $scope.newName
-        });
-        $scope.newName = "";
-    };
-    ```
-
-  ## 10.2 delete
-  - HTML
-    ```
-    <td><input type=button value="X" ng-click="delete(item.id)"></td>
-    ```
-  - CONTROLLER
-    ```
-    $scope.delete = function (id) {
-      $scope.items.list.forEach(function(item,index,arr) {
-        if (item.id == id)
-          return arr.splice(index,1);
-      })
-    };
-    ```
-
-# 11. Ajax Request    
-  ## 11.0 NODEJS EXPRESS
-  - COMMON SERVER CODE
-    ```
-    var model = {
-      "title": "products",
-      "list": [
-        { "id": 1, "name": "alfa"},
-        { "id": 2, "name": "beta"},
-        { "id": 3, "name": "gamma"}
-      ]
-    }
-    app.post('/products/:action',function(req,res) {
-    	switch (req.params.action) {
-        case "load":
-          res.send(model);
-          return;
-        case "save":
-          res.send("ok");
-          model = req.body;
-          return;
-        default:
-      }
+## 7. Modal Popup to Edit Product
+```
+  <div ng-repeat="item in items.list" class="modal fade" id="editPrompt{{item.id}}" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="exampleModalLongTitle">Edit Product {{item.id}}</h5>
+          <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
+        </div>
+        <div class="modal-body">
+          <input id="product_{{item.id}}" type=text value={{item.name}}>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+          <button type="button" class="btn btn-primary" ng-click="edit('#editPrompt'+item.id,'#product_' + item.id,item.id)">Edit</button>
+        </div>
+      </div>
+    </div>
+  </div>
+```
+## 8. On Showing Modal Prompt => select & focus input field
+```
+  <script>
+    $(window).on('shown.bs.modal', function() {
+      var inputObj = $(".modal-body").find("input");
+      inputObj.select();
+      inputObj.focus();
     });
-    ```
-  ## 11.1 load data
-  - HTML
-    ```
-    <input type=button value="load" ng-click="load()">
-    ```
-  - CONTROLLER
-    ```
-    $scope.load = function() {
-      $http
-      .post("/products/load")
-      .then(function(response) {
-        $scope.items = response.data;
-      });
-    }
-    ```
+  </script>
+```
 
-  ## 11.2 save data
-  - HTML
-    ```
-    <input type=button value="save" ng-click="save()">
-    ```
-  - CONTROLLER
-    ```
-    $scope.save = function() {
-      $http
-      .post("/products/save",$scope.items)
-      .then(function(response) {
-      });
-    }
-    ```
-
-# 12 Advanced features
+# 20 Other features
   ## 12.1 ng-include
   ## 12.2 factory (services, objects)
   ## 12.3 create new directive (like ng-app, ng-repeat...)

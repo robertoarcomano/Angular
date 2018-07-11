@@ -4,14 +4,19 @@ var app = express();
 app.use(express.static(__dirname + '/public'));
 app.use(express.static(__dirname + '/js'));
 app.use(express.json());
+const DEFAULT_PRODUCTS = 4;
 
 var model = {
   "title": "products",
-  "list": [
-    { "id": 1, "name": "alfa"},
-    { "id": 2, "name": "beta"},
-    { "id": 3, "name": "gamma"}
-  ]
+  "list": []
+}
+
+function initItems(n) {
+  for (i = 1; i <= n; i++)
+    model.list.push({
+      "id": i,
+      "name": "product " + i
+    })
 }
 
 app.post('/products/:action',function(req,res) {
@@ -29,3 +34,4 @@ app.post('/products/:action',function(req,res) {
 
 const SERVERPORT = 80;
 app.listen(SERVERPORT);
+initItems(DEFAULT_PRODUCTS);
