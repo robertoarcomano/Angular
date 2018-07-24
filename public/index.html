@@ -14,7 +14,7 @@
 
 <!-- 3. Define Controller -->
 <body ng-controller="hCtrl">
-  <div style="width: 350px;">
+  <div style="width: 350px; height: 85%">
 
     <!-- 4. Products Count & Load & Save Buttons -->
     <h5 class="card-title">Products Count: {{filtered.length}}</h5>
@@ -24,7 +24,7 @@
 
     <!-- 5. Product List -->
     <div style="height: 60%; overflow-y: scroll">
-      <div ng-repeat="item in items.list|filter: searchFilter|orderBy:'name' as filtered" class="card" style="width: 18rem;">
+      <div ng-repeat="item in items.list|filter: searchFilter|orderBy:'name' as filtered" class="card"">
         <div class="card-body">
           <h5 class="card-title">{{item.name}}</h5>
           <button type="button" class="btn btn-primary" data-toggle="modal" data-target="#editPrompt{{item.id}}">
